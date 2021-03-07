@@ -45,6 +45,8 @@ $Credential = New-Object System.Management.Automation.PSCredential ($VMLocalAdmi
 $VirtualMachine = New-AzVMConfig -VMName $VMName -VMSize $VMSize
 $VirtualMachine = Set-AzVMOperatingSystem -VM $VirtualMachine -Windows -ComputerName $ComputerName -Credential $Credential -ProvisionVMAgent -EnableAutoUpdate
 $VirtualMachine = Add-AzVMNetworkInterface -VM $VirtualMachine -Id $NIC.Id
+#Comment out the next line to use a Premium SSD instead of a (cheaper) Standard HDD
+$VirtualMachine = Set-AzVMOSDisk -CreateOption fromImage -VM $VirtualMachine -StorageAccountType Standard_LRS -Windows
 $VirtualMachine = Set-AzVMSourceImage -VM $VirtualMachine -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2019-Datacenter' -Version latest
 
 #Create the VM
@@ -54,7 +56,7 @@ New-AzVM -ResourceGroupName $ResourceGroupName -Location $LocationName -VM $Virt
 $PublicSettings=@{"port"= "6516";"cspFrameAncestors"= ("https://portal.azure.com","https://*.hosting.portal.azure.net","https://localhost:1340");"corsOrigins"= ("https://portal.azure.com","https://waconazure.com")}
 Set-AzVMExtension -ResourceGroupName $ResourceGroupName -Location $LocationName -VMName $VMName -Name "AdminCenter" -Publisher "Microsoft.AdminCenter" -Type "AdminCenter" -TypeHandlerVersion "0.0" -settings $PublicSettings
 
-"Open the Azure Portal, locate the VM '"+$VMName+ "', select 'Windows Admin Center' and click 'Connect'"
+"Open the Azure Portal in Edge, locate the VM '"+$VMName+ "', select 'Windows Admin Center' and click 'Connect'"
 
 "Tidy Up with"
 "Remove-AzResourceGroup -Name $ResourceGroupName -Force"
